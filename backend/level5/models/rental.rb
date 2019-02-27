@@ -84,15 +84,15 @@ class Rental
 
 		case actor
 			when 'driver'
-				@price + get_options_price_if_options?(options, duration, 'driver')
+				@price + get_options_price_if_options?(options, duration, actor)
 			when 'owner'
-				price = (@price - comission) + get_options_price_if_options?(options, duration, 'owner')
+				price = (@price - comission) + get_options_price_if_options?(options, duration, actor)
 			when 'insurance'
 				insurance
 			when 'assistance'
 				assistance
 			when 'drivy'
-				drivy + get_options_price_if_options?(options, duration, 'drivy')
+				drivy + get_options_price_if_options?(options, duration, actor)
 			else
 				return
 		end
