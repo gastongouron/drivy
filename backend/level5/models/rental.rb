@@ -114,8 +114,8 @@ class Rental
 		options_stack = []
 
 		unless actor === 'drivy'
-			options.include?('gps') ? options_stack.push(500*duration) : options_stack.push(0)
-			options.include?('baby_seat') ? options_stack.push(200*duration) : options_stack.push(0)
+			options.include?('gps') ? options_stack.push(500*duration) : options_stack
+			options.include?('baby_seat') ? options_stack.push(200*duration) : options_stack
 		end
 
 		(actor === 'driver' || actor === 'drivy') && options.include?('additional_insurance') ? options_stack.push(1000*duration) : options_stack.push(0)
