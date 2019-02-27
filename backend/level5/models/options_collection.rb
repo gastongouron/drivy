@@ -9,8 +9,6 @@ class OptionsCollection
 
 	def find_by_rental(rental_id)
     	a = self.select { |option| option.rental_id === rental_id }
-    	# self.select { |option| puts option.rental_id }
-    	# a.first
   	end
 
 	def to_json(*options)

@@ -11,7 +11,7 @@ class CarCollection
 		self.cars.each(&block)
 	end
 
-	def find(id)
+	def find_by_car(id)
     	a = self.select { |car| car.id === id }
     	a.first
   	end

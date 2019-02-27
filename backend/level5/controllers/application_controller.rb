@@ -8,7 +8,9 @@ require './models/rental_collection'
 require './views/rentals'
 
 class App
-
+	
+	include RentalView
+	
 	def initialize(input, output_path)
 		begin
 			if input = JSON.parse(File.read(input))
@@ -21,7 +23,7 @@ class App
 	end
 
 	def show
-		RentalView.new(@output_path, JSON.pretty_generate("rentals": JSON.parse(@rental_collection.to_json)))
+		log(@output_path, JSON.pretty_generate("rentals": JSON.parse(@rental_collection.to_json)))
 	end
 
 	private
@@ -37,7 +39,7 @@ class App
 
 		rentals = []
 		input["rentals"].map do |rental| 
-			car = car_collection.find(rental["car_id"])
+			car = car_collection.find_by_car(rental["car_id"])
 			options = options_collection.find_by_rental(rental["id"])
 			rentals << Rental.new(rental, car, options)
 		end

@@ -9,7 +9,6 @@ class Rental
 		@distance 	= rental_obj["distance"]
 		@options 	= options
 		@car 		= car
-		@car_ppd 	= get_car_ppd
 		@price 		= set_price
 	end
 
@@ -37,58 +36,31 @@ class Rental
 
 	def apply_offer_if_required!
 		duration = get_duration
-		ppd = @car_ppd	
+		@car.price_per_day	
 		i = 0
 		day_stack = []
 		while duration > i
 			case i
 				when 0
-					day_stack << ppd
+					day_stack << @car.price_per_day
 				when 1..3
-					day_stack << ppd - (ppd*10) / 100
+					day_stack << @car.price_per_day - (@car.price_per_day*10) / 100
 				when 4..9
-					day_stack << ppd - (ppd*30) / 100
+					day_stack << @car.price_per_day - (@car.price_per_day*30) / 100
 				else 				
-					day_stack << ppd - (ppd*50) / 100
+					day_stack << @car.price_per_day - (@car.price_per_day*50) / 100
 			end
 			i += 1
 		end
-		day_stack.reduce(:+)
-	end
-
-	def get_car_ppd
-		options = get_options
-		if options != []
-
-			options_stack = []
-			options.each do |option|
-
-				case option
-					when "gps"
-						options_stack << 500
-					when "baby_seat"
-						options_stack << 200
-					when "additional_insurance"
-						options_stack << 1000
-					else
-						return
-				end
-			end
-			@car.price_per_day + options_stack.reduce(:+)
-		else
-			@car.price_per_day
-		end
-
-
-
+		sum_val_of(day_stack)
 	end
 
 	def get_actions
 		actions = []
-		["driver", "owner", "insurence", "assistance", "drivy"].each do |actor|
-			who = actor
-			type = actor == "driver" ? "debit" : "credit"
-			amount = actor == "driver" ? @price : get_credit_amount(actor)
+		["driver", "owner", "insurance", "assistance", "drivy"].each do |actor|
+			who 	= actor
+			type 	= actor == "driver" ? "debit" : "credit"
+			amount 	= get_credit_amount(actor)
 			actions << {"who": who, type: type, amount: amount}
 		end
 		actions
@@ -103,21 +75,26 @@ class Rental
 	end
 
 	def get_credit_amount(actor)
-		duration = get_duration
-		total_comission = (@price * 30) / 100
-		insurence = total_comission / 2
-		assistance = duration * 100
-		drivy = total_comission - insurence - assistance
+		options 	= get_options
+		duration 	= get_duration
+		comission 	= (@price * 30) / 100
+		insurance 	= comission / 2
+		assistance 	= duration * 100
+		drivy 		= comission - insurance - assistance
 
 		case actor
+			when 'driver'
+				@price + get_options_price_if_options?(options, duration, 'driver')
 			when 'owner'
-				@price - total_comission
-			when 'insurence'
-				insurence
+				price = (@price - comission) + get_options_price_if_options?(options, duration, 'owner')
+			when 'insurance'
+				insurance
 			when 'assistance'
 				assistance
-			else 				
-				drivy
+			when 'drivy'
+				drivy + get_options_price_if_options?(options, duration, 'drivy')
+			else
+				return
 		end
 	end
 
@@ -127,6 +104,24 @@ class Rental
 			options: get_options,
 			actions: get_actions
 		}
+	end
+
+	def sum_val_of(array)
+		array.reduce(:+)
+	end
+
+	def get_options_price_if_options?(options, duration, actor)
+		options_stack = []
+
+		unless actor === 'drivy'
+			options.include?('gps') ? options_stack.push(500*duration) : options_stack.push(0)
+			options.include?('baby_seat') ? options_stack.push(200*duration) : options_stack.push(0)
+		end
+
+		(actor === 'driver' || actor === 'drivy') && options.include?('additional_insurance') ? options_stack.push(1000*duration) : options_stack.push(0)
+
+		sum_val_of(options_stack)
+
 	end
 
 end
