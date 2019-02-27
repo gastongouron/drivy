@@ -23,7 +23,7 @@ class App
 	end
 
 	def show
-		log(@output_path, JSON.pretty_generate("rentals": JSON.parse(@rental_collection.to_json)))
+		export_as_json(@output_path, JSON.pretty_generate("rentals": JSON.parse(@rental_collection.to_json)))
 	end
 
 	private
